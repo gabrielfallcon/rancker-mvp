@@ -143,7 +143,7 @@ const PaymentStepComponent = () => {
               customization={{
                 checkout: { theme: { elementsColor: '#7300ff80' } }
               }}
-              initialization={{ preferenceId, redirectMode: 'blank' }}
+              initialization={{ preferenceId }}
               locale='pt-BR'
             />
           )}

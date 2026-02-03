@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         title: 'Taxa da plataforma',
         quantity: 1,
         currency_id: 'BRL',
-        unit_price: 1.5
+        unit_price: 2
       }
     ];
 
@@ -90,9 +90,9 @@ export async function POST(req: Request) {
         // marketplace_fee: Number(applicationFee.toFixed(2)),
         notification_url: `https://rancker.com/api/webhook/mercadopago`,
         back_urls: {
-          success: `https://rancker.com/success`,
-          failure: `https://rancker.com/error`,
-          pending: `https://rancker.com/pending`
+          success: `https://rancker-mvp.vercel.app/success`,
+          failure: `https://rancker-mvp.vercel.app/error`,
+          pending: `https://rancker-mvp.vercel.app/pending`
         }
       }
     });
