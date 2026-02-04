@@ -12,8 +12,14 @@ import { ButtonTag } from '../button';
 import { TextFieldTag } from '../text-field';
 import './footer.styles.scss';
 import { DividerTag } from '../divider';
+import { useRouter } from 'next/navigation';
 
 function FooterComponent() {
+  const router = useRouter();
+
+  const redirectLink = (link: string) => {
+    router.push(link);
+  };
   const { control } = useForm();
   return (
     <footer className='footer-wrapper'>
@@ -25,7 +31,7 @@ function FooterComponent() {
             <PhoneIcon />
             <div>
               <p>Ficou com alguma dúvida?</p>
-              <span>+(55) 11 91111-1111</span>
+              <span>+(55) 11 99180-5514</span>
             </div>
           </div>
 
@@ -33,12 +39,12 @@ function FooterComponent() {
             <EmailIcon />
             <div>
               <p>Entre em contato</p>
-              <span>contato@rancker.com</span>
+              <span>ranckersports@gmail.com</span>
             </div>
           </div>
         </div>
 
-        <div className='box-newsletter'>
+        {/* <div className='box-newsletter'>
           <h3>Newsletter</h3>
           <p>Receba todas as atualizações da Rancker e fique por dentro.</p>
 
@@ -52,10 +58,10 @@ function FooterComponent() {
             />
             <ButtonTag label='Cadastrar-se' primary />
           </div>
-        </div>
+        </div> */}
       </div>
 
-      <div className='footer-wrapper__list-links'>
+      {/* <div className='footer-wrapper__list-links'>
         <ul>
           <span>Rancker</span>
           <li>Quem somos</li>
@@ -80,7 +86,7 @@ function FooterComponent() {
           <li>Política e Privacidade</li>
           <li>Política de Cookies</li>
         </ul>
-      </div>
+      </div> */}
 
       <DividerTag />
 
@@ -89,19 +95,35 @@ function FooterComponent() {
           <span>Acompanhe a Rancker</span>
           <ul>
             <li>
-              <WhatsAppIcon />
+              <WhatsAppIcon
+                onClick={() =>
+                  redirectLink('https://wa.me/send?phone=5511991805514')
+                }
+              />
             </li>
             <li>
-              <InstagramIcon />
+              <InstagramIcon
+                onClick={() =>
+                  redirectLink(
+                    'https://www.instagram.com/user?username=ranckersports'
+                  )
+                }
+              />
             </li>
             <li>
-              <SmallEmailIcon />
+              <SmallEmailIcon
+                onClick={() =>
+                  redirectLink(
+                    'https://www.mailto:email@://ranckersports@gmail.com'
+                  )
+                }
+              />
             </li>
           </ul>
         </div>
 
         <p className='copyright-text'>
-          Copyright © 2024 Rancker | Todos os direitos reservados.
+          Copyright © 2026 Rancker | Todos os direitos reservados.
         </p>
       </div>
 
@@ -110,7 +132,7 @@ function FooterComponent() {
           <LogoTextIcon />
 
           <p className='copyright-text'>
-            Copyright © 2024 Rancker <br /> Todos os direitos reservados.
+            Copyright © 2026 Rancker <br /> Todos os direitos reservados.
           </p>
         </div>
 
@@ -118,7 +140,7 @@ function FooterComponent() {
           <PhoneIcon />
           <div>
             <p>Ficou com alguma dúvida?</p>
-            <span>+(55) 11 91111-1111</span>
+            <span>+(55) 11 99180-5514</span>
           </div>
         </div>
 
@@ -126,7 +148,7 @@ function FooterComponent() {
           <EmailIcon />
           <div>
             <p>Entre em contato</p>
-            <span>contato@rancker.com</span>
+            <span>ranckersports@gmail.com</span>
           </div>
         </div>
       </div>
