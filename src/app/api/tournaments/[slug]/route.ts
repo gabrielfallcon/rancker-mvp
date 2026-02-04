@@ -7,6 +7,8 @@ export async function GET(
 ) {
   const { slug } = await context.params;
 
+  console.log(slug, 'slug');
+
   const tournament = await prisma.tournament.findUnique({
     where: { slug },
     include: {

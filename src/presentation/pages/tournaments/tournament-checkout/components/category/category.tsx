@@ -244,47 +244,96 @@ const CategoryComponent = () => {
         </div>
       </div>
 
+      <h2 className={styles.loteTitle}>Lote de Inscrições</h2>
+
+      <table className={styles.tableLote}>
+        <thead>
+          <tr>
+            <td>.</td>
+            <td>1º Lote</td>
+            <td>2º Lote</td>
+            <td>3º Lote</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Valor:</td>
+            <td>R$ 290,00</td>
+            <td>R$ 300,00</td>
+            <td>R$ 310,00</td>
+          </tr>
+          <tr>
+            <td>Limite:</td>
+            <td>8 duplas por categoria</td>
+            <td>Ilimitado</td>
+            <td>ilimitado</td>
+          </tr>
+          <tr>
+            <td>Validade:</td>
+            <td>até 20/02/2026</td>
+            <td>até 31/03/2026</td>
+            <td>até 15/04/2026</td>
+          </tr>
+        </tbody>
+      </table>
+
       <div className={styles.contentInfo}>
         <h2>Descrição</h2>
         <br />
 
         <p>🌍⚽ NA ILHA WORLD CUP ⚽🌍</p>
+        <p>O futevôlei entrou em clima de Copa do Mundo.</p>
         <br />
 
-        <p>O futevôlei entrou em clima de Copa do Mundo.</p>
         <p>
           O Na Ilha World Cup nasce inspirado na Copa do Mundo de 2026 e traz
           para o futevôlei um formato inédito, nunca visto antes.
         </p>
-        <p>
-          Jogos com hora marcada! Nivelamento levado a sério! Formato inédito no
-          futevôlei Cada dupla representa uma seleção!
-        </p>
+        <br />
+
+        <ul>
+          <li>Jogos com hora marcada!</li>
+          <li>Nivelamento levado a sério!</li>
+          <li>Formato inédito no futevôlei</li>
+          <li>Cada dupla representa uma seleção!</li>
+        </ul>
+
+        <br />
+
         <p>
           Na Ilha World Cup: onde o futevôlei vive a emoção de uma Copa do Mundo
         </p>
       </div>
 
-      <div className={styles.contentInfo}>
-        <div>
-          <LocationIcon /> <h2>Como Chegar</h2>
+      <div className={styles.contentMap}>
+        <div className={styles.contentInfo}>
+          <div>
+            <LocationIcon /> <h2>Como Chegar</h2>
+          </div>
+
+          {tournament?.addressName && (
+            <>
+              <h4>Local</h4>
+              <p>{tournament.addressName}</p>
+            </>
+          )}
+
+          <h4>Endereço</h4>
+          <p>
+            {tournament?.addressStreet} - {tournament?.addressCity} -{' '}
+            {tournament?.addressState} - {tournament?.addressZip}
+          </p>
+
+          <span onClick={goToWaze}>Abrir no waze</span>
         </div>
-
-        {tournament?.addressName && (
-          <>
-            <h4>Local</h4>
-            <p>{tournament.addressName}</p>
-          </>
-        )}
-
-        <h4>Endereço</h4>
-        <p>
-          {tournament?.addressStreet} - {tournament?.addressCity} -{' '}
-          {tournament?.addressState} - {tournament?.addressZip}
-          78557-460
-        </p>
-
-        <span onClick={goToWaze}>Abrir no waze</span>
+        <div className={styles.mapWaze}>
+          <iframe
+            src={`https://embed.waze.com/iframe?zoom=16&lat=-23.563894&lon=-46.551796&ct=livemap`}
+            width='600'
+            height='450'
+            allowFullScreen
+          ></iframe>
+        </div>
       </div>
 
       <ModalTag
