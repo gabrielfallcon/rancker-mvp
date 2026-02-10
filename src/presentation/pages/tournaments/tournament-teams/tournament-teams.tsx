@@ -71,44 +71,43 @@ function TournamentTeamsComponent({ categories }: TournamentTeamsProps) {
         onClick={handleClick}
         tabs={categories.map(category => ({
           label: category.name,
-          content:
-            categories[initialTab].teams.length === 0 ? (
-              <span>Nenhuma dupla Registrada</span>
-            ) : (
-              <div className={styles.contentStatus}>
-                <div className={styles.headStatus}>
-                  <span>Duplas</span>
-                  <span>Categoria</span>
-                  <span>Inscrição</span>
-                </div>
-
-                <ul className={styles.bodyStatus}>
-                  {category.teams.map(team => (
-                    <li key={team.id}>
-                      <p>
-                        {firstAndLastName(team.athletes[0].athlete.name)}
-                        <span>e</span>{' '}
-                        {firstAndLastName(team.athletes[1].athlete.name)}
-                      </p>
-
-                      <div>
-                        <div className={styles.category}>{category.name}</div>
-                      </div>
-
-                      <div>
-                        <div
-                          className={[styles.status, styles[team.status]].join(
-                            ' '
-                          )}
-                        >
-                          {status[team.status]}
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+          content: !category?.teams ? (
+            <span>Nenhuma dupla Registrada</span>
+          ) : (
+            <div className={styles.contentStatus}>
+              <div className={styles.headStatus}>
+                <span>Duplas</span>
+                <span>Categoria</span>
+                <span>Inscrição</span>
               </div>
-            )
+
+              <ul className={styles.bodyStatus}>
+                {category.teams.map(team => (
+                  <li key={team.id}>
+                    <p>
+                      {firstAndLastName(team.athletes[0].athlete.name)}
+                      <span>e</span>{' '}
+                      {firstAndLastName(team.athletes[1].athlete.name)}
+                    </p>
+
+                    <div>
+                      <div className={styles.category}>{category.name}</div>
+                    </div>
+
+                    <div>
+                      <div
+                        className={[styles.status, styles[team.status]].join(
+                          ' '
+                        )}
+                      >
+                        {status[team.status]}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
         }))}
       />
     </div>
