@@ -7,6 +7,88 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tournament {
+  id                String     @id @default(uuid())
+  name              String
+  slug              String     @unique
+  description       String?
+  startDate         DateTime
+  endDate           DateTime
+  registrationEndAt DateTime
+  bannerImage       String?
+  primaryColor      String?
+  secondaryColor    String?
+  addressName       String?
+  addressStreet     String?
+  addressCity       String?
+  addressState      String?
+  addressZip        String?
+  latitude          Float?
+  longitude         Float?
+  createdAt         DateTime   @default(now())
+  categories        Category[]
+  teams             Team[]
+}
+
+model Category {
+  id              String         @id @default(uuid())
+  name            String
+  price           Float
+  maxInstallments Int            @default(1)
+  maxTeams        Int
+  status          CategoryStatus @default(available)
+  prizes          Json?
+  tournamentId    String
+  createdAt       DateTime       @default(now())
+  tournament      Tournament     @relation(fields: [tournamentId], references: [id])
+  teams           Team[]
+}
+
+model Athlete {
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  instagram   String
+  phone       String
+  uniformSize String?
+  teams       TeamAthlete[]
+}
+
+model Team {
+  id              String        @id @default(uuid())
+  tournamentId    String
+  categoryId      String
+  stripeSessionId String
+  status          TeamStatus
+  createdAt       DateTime      @default(now())
+  paymentId       String
+  category        Category      @relation(fields: [categoryId], references: [id])
+  tournament      Tournament    @relation(fields: [tournamentId], references: [id])
+  athletes        TeamAthlete[]
+
+  @@index([stripeSessionId])
+}
+
+model TeamAthlete {
+  id        String  @id @default(uuid())
+  teamId    String
+  athleteId String
+  athlete   Athlete @relation(fields: [athleteId], references: [id])
+  team      Team    @relation(fields: [teamId], references: [id])
+
+  @@unique([teamId, athleteId])
+}
+
+model Payment {
+  id           String   @id
+  provider     String
+  status       String
+  amount       Float
+  tournamentId String
+  athleteEmail String
+  createdAt    DateTime @default(now())
+}
+
 enum TeamStatus {
   pending
   paid
@@ -26,103 +108,4 @@ enum CategoryStatus {
   last_spots
   sold_out
   in_progress
-}
-
-model Tournament {
-  id          String  @id @default(uuid())
-  name        String
-  slug        String  @unique
-  description String?
-
-  startDate         DateTime
-  endDate           DateTime
-  registrationEndAt DateTime
-
-  bannerImage    String?
-  primaryColor   String?
-  secondaryColor String?
-
-  // Endereço
-  addressName   String? // Ex: Arena Beach Sports
-  addressStreet String?
-  addressCity   String?
-  addressState  String?
-  addressZip    String?
-  latitude      Float?
-  longitude     Float?
-
-  categories Category[]
-  teams      Team[]
-
-  createdAt DateTime @default(now())
-}
-
-model Category {
-  id    String @id @default(uuid())
-  name  String
-  price Float
-
-  maxInstallments Int            @default(1)
-  maxTeams        Int
-  status          CategoryStatus @default(available)
-
-  prizes Json?
-
-  tournamentId String
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-
-  teams Team[]
-
-  createdAt DateTime @default(now())
-}
-
-model Athlete {
-  id          String  @id @default(uuid())
-  name        String
-  email       String  @unique
-  instagram   String
-  phone       String
-  uniformSize String?
-
-  teams TeamAthlete[]
-}
-
-model Team {
-  id              String     @id @default(uuid())
-  tournamentId    String
-  categoryId      String
-  stripeSessionId String
-  status          TeamStatus
-  createdAt       DateTime   @default(now())
-
-  tournament Tournament @relation(fields: [tournamentId], references: [id])
-  category   Category   @relation(fields: [categoryId], references: [id])
-
-  paymentId String
-
-  athletes TeamAthlete[]
-
-  @@index([stripeSessionId])
-  @@unique([tournamentId, categoryId, paymentId])
-}
-
-model TeamAthlete {
-  id        String @id @default(uuid())
-  teamId    String
-  athleteId String
-
-  team    Team    @relation(fields: [teamId], references: [id])
-  athlete Athlete @relation(fields: [athleteId], references: [id])
-
-  @@unique([teamId, athleteId])
-}
-
-model Payment {
-  id           String   @id
-  provider     String // mercadopago
-  status       String
-  amount       Float
-  tournamentId String
-  athleteEmail String
-  createdAt    DateTime @default(now())
 }

@@ -1,9 +1,9 @@
-import { AthleteFormData } from '~/presentation/contexts';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { NextResponse } from 'next/server';
 import { PreferenceRequest } from 'mercadopago/dist/clients/preference/commonTypes';
-import { formatPayerName } from '~/utils';
+import { NextResponse } from 'next/server';
 import { prisma } from '~/lib/prisma';
+import { formatPayerName } from '~/utils';
+import { AthleteFormData } from '~/presentation/contexts';
 
 interface ApiReqProps {
   tournamentId: string;
@@ -14,10 +14,6 @@ interface ApiReqProps {
   }[];
   teamsByCategory: Record<string, AthleteFormData>;
   athlete: AthleteFormData;
-  paymentMethod: 'PIX' | 'CREDIT';
-  cardToken?: string;
-  installments?: number;
-  organizerAccessToken: string; // 🔑
   total: number;
 }
 
@@ -31,12 +27,26 @@ export async function POST(req: Request) {
 
     const { athlete, categories, teamsByCategory, tournamentId, total } = body;
 
-    // 💰 Cálculos
+    if (!athlete?.email || !tournamentId || !categories?.length) {
+      return NextResponse.json(
+        { error: 'Dados incompletos para criar pagamento' },
+        { status: 400 }
+      );
+    }
+
+    /* ------------------------------------------------------------------
+     * 💰 CÁLCULOS
+     * ------------------------------------------------------------------ */
+
     const subtotal = categories.reduce((acc, c) => acc + c.price, 0);
-    const platformFee = total - subtotal; // 18
-    const totalOrganizer = total - platformFee; //total
-    const organizerFee = totalOrganizer * 0.03; // 9
-    const applicationFee = platformFee + organizerFee; // 27
+    const platformFee = total - subtotal;
+    const totalOrganizer = total - platformFee;
+    const organizerFee = totalOrganizer * 0.03;
+    const applicationFee = platformFee + organizerFee;
+
+    /* ------------------------------------------------------------------
+     * 🛒 CRIA PREFERENCE
+     * ------------------------------------------------------------------ */
 
     const preference = new Preference(mp);
 
@@ -49,7 +59,7 @@ export async function POST(req: Request) {
         unit_price: c.price
       })),
       {
-        id: '3235233332sdfgg',
+        id: 'platform-fee',
         title: 'Taxa da plataforma',
         quantity: 1,
         currency_id: 'BRL',
@@ -71,7 +81,6 @@ export async function POST(req: Request) {
           name: payerName,
           surname: 'Atleta'
         },
-
         marketplace: 'Rancker',
         metadata: {
           tournamentId,
@@ -79,7 +88,6 @@ export async function POST(req: Request) {
           teamsByCategory,
           tax: applicationFee
         },
-
         back_urls: {
           success: `https://rancker-mvp.vercel.app/success`,
           failure: `https://rancker-mvp.vercel.app/error`,
@@ -89,57 +97,65 @@ export async function POST(req: Request) {
     });
 
     /* ------------------------------------------------------------------
-     * 3️⃣ Persistência no banco (ATÔMICA + PROTEGIDA)
+     * 💾 PERSISTÊNCIA NO BANCO (SEM TRANSAÇÃO INTERATIVA)
      * ------------------------------------------------------------------ */
-    await prisma.$transaction(async tx => {
-      // atleta principal
-      const mainAthlete = await tx.athlete.upsert({
-        where: { email: athlete.email },
-        update: athlete,
-        create: athlete
+
+    // 1️⃣ Upsert atleta principal
+    const mainAthlete = await prisma.athlete.upsert({
+      where: { email: athlete.email },
+      update: athlete,
+      create: athlete
+    });
+
+    // 2️⃣ Para cada categoria cria parceiro + time
+    for (const [categoryId, partner] of Object.entries(teamsByCategory)) {
+      const partnerAthlete = await prisma.athlete.upsert({
+        where: { email: partner.email },
+        update: partner,
+        create: partner
       });
 
-      // para cada categoria cria a dupla
-      for (const [categoryId, partner] of Object.entries(teamsByCategory)) {
-        const partnerAthlete = await tx.athlete.upsert({
-          where: { email: partner.email },
-          update: partner,
-          create: partner
-        });
+      // 🔒 Evita duplicação
+      const existingTeam = await prisma.team.findFirst({
+        where: {
+          tournamentId,
+          categoryId,
+          paymentId: String(response.id)
+        }
+      });
 
-        // 🔒 proteção contra duplicação
-        const existingTeam = await tx.team.findFirst({
-          where: {
-            tournamentId,
-            categoryId,
-            paymentId: String(response.id)
+      if (existingTeam) continue;
+
+      await prisma.team.create({
+        data: {
+          tournamentId,
+          categoryId,
+          status: 'pending',
+          paymentId: String(response.id),
+          stripeSessionId: String(response.id),
+          athletes: {
+            create: [
+              { athleteId: mainAthlete.id },
+              { athleteId: partnerAthlete.id }
+            ]
           }
-        });
+        }
+      });
+    }
 
-        if (existingTeam) continue;
-
-        await tx.team.create({
-          data: {
-            tournamentId,
-            categoryId,
-            status: 'pending', // 👈 você valida manualmente depois
-            paymentId: String(response.id),
-            stripeSessionId: String(response.id), // reaproveitando campo
-            athletes: {
-              create: [
-                { athleteId: mainAthlete.id },
-                { athleteId: partnerAthlete.id }
-              ]
-            }
-          }
-        });
-      }
-    });
+    /* ------------------------------------------------------------------
+     * ✅ RESPONSE
+     * ------------------------------------------------------------------ */
 
     return NextResponse.json({
       preferenceId: response.id
     });
   } catch (err) {
-    console.log(err, 'Error');
+    console.error('Checkout error:', err);
+
+    return NextResponse.json(
+      { error: 'Erro ao criar pagamento' },
+      { status: 500 }
+    );
   }
 }
