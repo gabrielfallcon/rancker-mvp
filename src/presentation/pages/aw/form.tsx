@@ -44,15 +44,6 @@ export default function OverrunForm() {
     label: c.label,
     value: c.value
   }));
-  const selectedChildren = watch('causeChildren') || [];
-
-  const selectedChild = cause?.children?.find(child =>
-    selectedChildren.some(c => c.value === child.value && c.checked)
-  );
-
-  const grandchildren = selectedChild?.children ?? [];
-
-  console.log(grandchildren, 'grandchildren');
 
   const onSubmit = (data: PurchaseOverrunForm) => {
     console.log('Form data', data);
