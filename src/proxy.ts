@@ -14,7 +14,8 @@ const PROTECTED_IF_LOGGED_PATHS = [
   '/torneios',
   '/torneios/na-ilha-world-cup',
   '/torneios/na-ilha-world-cup/admin',
-  '/aw'
+  '/aw',
+  '/dash'
 ];
 
 export function proxy(request: NextRequest) {
